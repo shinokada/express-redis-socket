@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <h1>Your nearby cities within <%= distance %> km: </h1>
+  <div id="distance" data-test=<%= distance %>></div>
+  <ul id="city-list"></ul>
+  <script>
+    const distance = document.getElementById('distance').dataset.test
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const data = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          distance: distance
+        };
+
+        const options = {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+
+        fetch("/nearby-cities", options)
+          .then((res) => res.json())
+          .then((cities) => {
+            // Display the cities on the page
+            const cityListElement = document.getElementById('city-list');
+            cities.forEach((city) => {
+              const cityElement = document.createElement('li');
+              cityElement.innerHTML = `${city[0]} (${parseInt(city[1])} km)`;
+              cityListElement.appendChild(cityElement);
+            });
+          });
+      });
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+  </script>
+</body>
+
+</html>
